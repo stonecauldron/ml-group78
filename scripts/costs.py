@@ -3,21 +3,26 @@
 
 import numpy as np
 
-def error_vector(y, tx, w):
-    """calculate the error vector
-    """
-    N = y.shape[0]
-    return y - np.squeeze(tx @ w)
 
-def compute_cost_mse(y, tx, w):
-    """calculate the cost using mean square error
-    """
-    N = y.shape[0]
-    e_vector = error_vector(y, tx, w)
-    return (1/(2*N) * (e_vector.T @ e_vector))
 
-def compute_cost_mae(y, tx, w):
-    """calculate the cost using mean absolute error
+def calculate_mse(e):
+    """Calculate the mse for vector e."""
+    return 1/2*np.mean(e**2)
+
+
+def calculate_mae(e):
+    """Calculate the mae for vector e."""
+    return np.mean(np.abs(e))
+
+
+def compute_loss_MSE(y, tx, w):
+    """Calculate the loss.
+
+    You can calculate the loss using mse or mae.
     """
-    N = y.shape[0]
-    return (1/N) * (np.ones(N).T @ np.abs(e_vector))
+    e = y - tx.dot(w)
+    return calculate_mse(e)
+    # return calculate_mae(e)
+def compute_loss_MAE(y, tx, w):
+    e = y - tx.dot(w)
+    return calculate_mae(e)
