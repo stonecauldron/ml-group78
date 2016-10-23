@@ -1,5 +1,33 @@
 # -*- coding: utf-8 -*-
 """ ML-methods to implement """
+########################################################################################################################################
+"""This script contains the various machine learning algorithms used to predict an output given a training set"""
+
+#The included algorithms and their main helper and cost functions are:
+# 1- Least Squares with Gradient Descent:least_squares_GD(y, tx, gamma, max iters)
+    # a.calculate_gradient_mse(y, tx, w): Computes the gradient required to perform gradient_descent
+    # b.calculate_loss_mse(y,tx,w): Returns the mean square error obtained for the given y,tx,w
+    
+# 2- Least Squares with Stochastic Gradient Descent: least_squares_SGD(y, tx, gamma, max_iters):
+    #a. batch_iter(y, tx, batch_size, num_batches=None, shuffle=True): Generate a minibatch iterator for a dataset.
+    #b.calculate_gradient_mse(y, tx, w): Computes the gradient required to perform gradient_descent
+    #c.calculate_loss_mse(y,tx,w): Returns the mean square error obtained for the given y,tx,w
+    
+# 3- Least Squares:least_squares(y, tx)
+
+# 4- Ridge Regression: ridge_regression(y, tx, lambda_): Ridge regression using normal equations""
+    
+# 5- Logistic Regression:logistic_regression(y, tx, gamma, max_iters)
+    #a. calculate_gradient_log_likelihood(y, tx, w): Determines the gradient of the negative log likelihood function
+    #b. sigmoid(t): Applies sigmoid function on t while taking into consideration boundary conditions
+    #c. calculate_loss_log_likelihood(y, tx, w): Returns the cost value for the given y,tx and w.
+    
+# 6- Regularized Logistic Regression:reg_logistic_regression(y, tx, lambda_, gamma, max_iters)
+    #a. calculate_gradient_log_likelihood(y, tx, w): Determines the gradient of the negative log likelihood function
+    #b. sigmoid(t): Applies sigmoid function on t while taking into consideration boundary conditions
+    #c. calculate_loss_log_likelihood(y, tx, w): Returns the cost value for the given y,tx and w.
+
+#######################################################################################################################################
 
 import numpy as np
 
@@ -8,17 +36,13 @@ def least_squares_GD(y, tx, gamma, max_iters):
     # init parameters
     threshold = 1e-8
     losses = []
-
     w = np.zeros(tx.shape[1])
-
-    # start the logistic regression
+    # start the regression
     for iter in range(max_iters):
         gradient = calculate_gradient_mse(y, tx, w)
-        
         # get loss and updated w
         loss = calculate_loss_mse(y, tx, w)
         w = w - gamma * gradient
-        
         # log info
         if iter % 1000 == 0:
             print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
@@ -34,18 +58,15 @@ def least_squares_SGD(y, tx, gamma, max_iters):
     # init parameters
     threshold = 1e-8
     losses = []
-
     w = np.zeros(tx.shape[1])
 
-    # start the logistic regression
+    # Perform regression on a data batch 
     for iter in range(max_iters):
         for batch_y, batch_tx in batch_iter(y, tx, 100, num_batches=1):
             gradient = calculate_gradient_mse(batch_y, batch_tx, w)
-        
         # get loss and updated w
         loss = calculate_loss_mse(y, tx, w)
         w = w - gamma * gradient
-        
         # log info
         if iter % 1000 == 0:
             print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
@@ -76,9 +97,7 @@ def logistic_regression(y, tx, gamma, max_iters):
     # init parameters
     threshold = 1e-5
     losses = []
-
     w = np.zeros(tx.shape[1])
-
     # start the logistic regression
     for iter in range(max_iters):
         gradient = calculate_gradient_log_likelihood(y, tx, w)
@@ -152,7 +171,7 @@ def calculate_gradient_mse(y, tx, w):
 def sigmoid(t):
     """apply sigmoid function on t."""
     t[t > 709] = 709
-    return (np.exp(t))/(1 + np.exp(t))
+    return 1/(1 + np.exp(-1*t))
 
 def calculate_gradient_log_likelihood(y, tx, w):
     """compute the gradient of negative log likelihood."""
