@@ -74,7 +74,7 @@ def ridge_regression(y, tx, lambda_):
 def logistic_regression(y, tx, gamma, max_iters):
     """Logistic regression using gradient descent"""
     # init parameters
-    threshold = 1e-8
+    threshold = 1e-5
     losses = []
 
     w = np.zeros(tx.shape[1])
@@ -88,7 +88,7 @@ def logistic_regression(y, tx, gamma, max_iters):
         w = w - gamma * gradient
         
         # log info
-        if iter % 1000 == 0:
+        if iter % 100 == 0:
             print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
         # converge criteria
         losses.append(loss)
@@ -100,7 +100,7 @@ def logistic_regression(y, tx, gamma, max_iters):
 def reg_logistic_regression(y, tx, lambda_, gamma, max_iters):
     """Regularized logistic regression using gradient descent"""
     # init parameters
-    threshold = 1e-8
+    threshold = 1e-5
     losses = []
 
     w = np.zeros(tx.shape[1])
@@ -114,7 +114,7 @@ def reg_logistic_regression(y, tx, lambda_, gamma, max_iters):
         w = w - gamma * gradient
         
         # log info
-        if iter % 1000 == 0:
+        if iter % 100 == 0:
             print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
         # converge criteria
         losses.append(loss)
@@ -137,7 +137,9 @@ def calculate_loss_mse(y, tx, w):
 def calculate_loss_log_likelihood(y, tx, w):
     """compute the cost by negative log likelihood."""
     N = y.shape[0]
-    return np.sum(np.log(1 + np.exp(tx @ w)) - (y.T @ tx @ w))
+    txw = tx @ w
+    txw[txw > 709] = 709
+    return np.sum(np.log(1 + np.exp(txw)) - (y.T @ tx @ w))
 
 # linear regression helpers
 def calculate_gradient_mse(y, tx, w):
@@ -149,6 +151,7 @@ def calculate_gradient_mse(y, tx, w):
 # logistic regression helpers
 def sigmoid(t):
     """apply sigmoid function on t."""
+    t[t > 709] = 709
     return (np.exp(t))/(1 + np.exp(t))
 
 def calculate_gradient_log_likelihood(y, tx, w):
@@ -185,3 +188,14 @@ def batch_iter(y, tx, batch_size, num_batches=None, shuffle=True):
         end_index = min((batch_num + 1) * batch_size, data_size)
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
+            
+# cross validation
+def build_k_indices(y, k_fold, seed):
+    """build k indices for k-fold."""
+    num_row = y.shape[0]
+    interval = int(num_row / k_fold)
+    np.random.seed(seed)
+    indices = np.random.permutation(num_row)
+    k_indices = [indices[k * interval: (k + 1) * interval]
+                 for k in range(k_fold)]
+    return np.array(k_indices)
