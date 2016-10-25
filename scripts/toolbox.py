@@ -110,16 +110,16 @@ def reg_logistic_regression(y, tx, lambda_, gamma, max_iters):
         gradient = calculate_gradient_log_likelihood(y, tx, w) + (lambda_ * 2 * w)
         
         # get loss and updated w
-        loss = calculate_loss_log_likelihood(y, tx, w) + lambda_ * np.sum(w**2)
+        loss = 0#calculate_loss_log_likelihood(y, tx, w) + lambda_ * np.sum(w**2)
         w = w - gamma * gradient
         
         # log info
-        if iter % 100 == 0:
+        if iter % 1000 == 0:
             print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
         # converge criteria
         losses.append(loss)
-        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-            break
+        #if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            #break
     print("The loss={l}".format(l=calculate_loss_log_likelihood(y, tx, w)))
     return w
     
@@ -137,9 +137,14 @@ def calculate_loss_mse(y, tx, w):
 def calculate_loss_log_likelihood(y, tx, w):
     """compute the cost by negative log likelihood."""
     N = y.shape[0]
-    txw = tx @ w
-    txw[txw > 709] = 709
-    return np.sum(np.log(1 + np.exp(txw)) - (y.T @ tx @ w))
+    loss = 0
+    for n in range(N):
+        x_t_w = tx[n,:].T @ w
+        if x_t_w <= 709:
+            loss = loss + (np.log(1 + np.exp(x_t_w)) - y[n] * (x_t_w))
+        else:
+            loss = loss + x_t_w * (1 - y[n])
+    return loss
 
 # linear regression helpers
 def calculate_gradient_mse(y, tx, w):
