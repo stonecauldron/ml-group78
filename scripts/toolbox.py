@@ -247,5 +247,5 @@ def calculate_gradient_log_likelihood(y, tx, w):
     a=tx.dot(w)
     for i in range (len(a)):
         a[i]=sigmoid(a[i])
-    gradient=np.transpose(X).dot(a-y)
+    gradient=np.transpose(tx).dot(a-y)
     return gradient/len(y)
