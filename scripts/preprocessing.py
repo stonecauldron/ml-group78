@@ -19,7 +19,7 @@ def binarize_invalid_data(col, invalid_value=-999):
     result = np.zeros((col.shape))
     
     invalid_value_indices = col == invalid_value
-    result[invalid_value_indices] = 0
+    result[invalid_value_indices] = -1
     result[~invalid_value_indices] = 1
     return result
 
@@ -37,7 +37,16 @@ def feature_scaling(col, min_range=-1, max_range=1):
     min_val = np.min(col)
     max_val = np.max(col)
     
+    if max_val - min_val == 0:
+        return col
+    
     return min_range + ((col - min_val) * (max_range - min_range))/(max_val - min_val)
+
+def feature_scaling_matrix(X, min_range=-1, max_range=1):
+    """Scale the values of a matrix to the range min_range to max_range"""
+    for col in range(X.shape[1]):
+        X[:,col] = feature_scaling(X[:,col])
+    return X
 
 def standardize_col(col):
     """Standardize a feature vector"""
@@ -83,18 +92,7 @@ def preprocess_inputs(tX):
         # standardize the feature that have an exponential family distribution
         elif d == 1 or d == 2 or d == 3 or d == 7 or d == 8 or d == 10 or d == 11 or d == 13 or d == 16 or d == 19 or d == 21:
             col = standardize_col(col)
-            col = feature_scaling(col)
             preprocessed_tX.append(col)
-
-        # convert discrete feature into multiple binary features
-        elif d == 22:
-            cols = generate_binary_features(col)
-            for col in cols:
-                preprocessed_tX.append(col)
-                
-        # discard the features that are sums
-        elif d == 29 or d == 9:
-            pass
 
         else:
             preprocessed_tX.append(col)
@@ -102,17 +100,32 @@ def preprocess_inputs(tX):
     result = np.asarray(preprocessed_tX).T
     return np.hstack((np.ones((result.shape[0],1)), result))
 
-def separate_data(X, y, jet_col_nb=22):
+def separate_data(X, jet_col_nb=22):
     """Separate data based on the number of jets"""
     
-    # treat invalid values
-    X[X == -999] = 0
+    # feature scale uniform distributions
+    uniform_cols = [14, 15, 17, 18, 20]
+    for col in uniform_cols:
+        pass
+        #X[:,col] = feature_scaling(X[:,col])
+        
+    # binary features
+    bin_cols = [11]
+    for col in bin_cols:
+        pass
+        #X[:,col] = binarize_positive_negative(X[:,col])
+        
+    # apply log to exponential distributions
+    exponential_cols = [13]
+    for col in exponential_cols:
+        pass
+        #X[:,col] = np.log(X[:,col])
     
     # find the indices of each discrete category
-    invalid_cols_0 = [4, 5, 6, 9, 22, 23, 24, 25, 26, 27, 28, 29]
-    invalid_cols_1 = [4, 5, 6, 9, 22, 26, 27, 28, 29]
-    invalid_cols_2 = [9, 22, 29]
-    invalid_cols_3 = [9, 22, 29]
+    invalid_cols_0 = [4, 5, 6, 9, 12, 22, 23, 24, 25, 26, 27, 28, 29]
+    invalid_cols_1 = [4, 5, 6, 12, 22, 26, 27, 28, 29]
+    invalid_cols_2 = [22, 29]
+    invalid_cols_3 = [22, 29]
     
     indices_0 = X[:,jet_col_nb] == 0
     indices_1 = X[:,jet_col_nb] == 1

@@ -94,9 +94,6 @@ def ridge_regression(y, tx, lambda_):
 
 def logistic_regression(y, tx, gamma, max_iters):
     """Logistic regression using gradient descent"""
-    # init parameters
-    threshold = 1e-5
-    losses = []
     w = np.zeros(tx.shape[1])
     # start the logistic regression
     for iter in range(max_iters):
@@ -107,12 +104,9 @@ def logistic_regression(y, tx, gamma, max_iters):
         w = w - gamma * gradient
         
         # log info
-        if iter % 100 == 0:
-            print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
-        # converge criteria
-        losses.append(loss)
-        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-            break
+        if iter % 1000 == 0:
+                print("Current iteration={i}, the loss={l}".format(i=iter, l=calculate_loss_log_likelihood(y, tx, w)))
+            
     print("The loss={l}".format(l=calculate_loss_log_likelihood(y, tx, w)))
     return w
 
@@ -132,7 +126,7 @@ def reg_logistic_regression(y, tx, lambda_, gamma, max_iters):
         w = w - gamma * gradient
         
         # log info
-        if iter % 1000 == 0:
+        if iter % 100 == 0:
             print("Current iteration={i}, the loss={l}".format(i=iter, l=calculate_loss_log_likelihood(y, tx, w)))
         
     print("The loss={l}".format(l=calculate_loss_log_likelihood(y, tx, w)))
@@ -151,13 +145,8 @@ def calculate_loss_mse(y, tx, w):
 
 def calculate_loss_log_likelihood(y, tx, w):
     """compute the cost by negative log likelihood."""
-    first_sigmoid_term = np.log(sigmoid(tx.dot(w)))
-    first_term = (y.T).dot(first_sigmoid_term)
-    second_sigmoid_term = np.log(1 - sigmoid(tx.dot(w)))
-    second_term = ((1 - y).T).dot(second_sigmoid_term)
-    pos_loss = first_term + second_term
-    return -1 * pos_loss
-
+    return np.sum(np.logaddexp(0, np.dot(tx, w)), axis=0) - np.dot(y.T, np.dot(tx, w))
+    
 # linear regression helpers
 def calculate_gradient_mse(y, tx, w):
     """Compute the gradient of the MSE loss function."""
@@ -216,3 +205,10 @@ def build_k_indices(y, k_fold, seed):
     k_indices = [indices[k * interval: (k + 1) * interval]
                  for k in range(k_fold)]
     return np.array(k_indices)
+
+def build_poly(X, degree):
+    result = []
+    for col in range(X.shape[1]):
+        for d in range(1, degree + 1):
+            result.append(X[:,col]**d)
+    return np.asarray(result).T
