@@ -149,7 +149,7 @@ def separate_data(X, jet_col_nb=22):
     invalid_cols_0 = [4, 5, 6, 9, 12, 22, 23, 24, 25, 26, 27, 28, 29]
     invalid_cols_1 = [4, 5, 6, 9, 12, 22, 26, 27, 28]
     invalid_cols_2 = [9,22]
-    invalid_cols_3 = [22]
+    #invalid_cols_3 = [22]
     
     indices_0 = X[:,jet_col_nb] == 0
     indices_1 = X[:,jet_col_nb] == 1
@@ -159,12 +159,12 @@ def separate_data(X, jet_col_nb=22):
     X_0 = X[indices_0]
     X_1 = X[indices_1]
     X_2 = X[np.logical_or(indices_2, indices_3)]
-    X_3 = X[indices_3]
+    #X_3 = X[indices_3]
      
     X_0 = np.delete(X_0, invalid_cols_0, axis=1)
     X_1 = np.delete(X_1, invalid_cols_1, axis=1)
     X_2 = np.delete(X_2, invalid_cols_2, axis=1)
-    X_3 = np.delete(X_3, invalid_cols_3, axis=1)
+    #X_3 = np.delete(X_3, invalid_cols_3, axis=1)
     
     X_0 = median_replace(X_0)
     X_1 = median_replace(X_1)
@@ -176,7 +176,7 @@ def separate_data(X, jet_col_nb=22):
     X_0 = standardize(X_0)
     X_1 = standardize(X_1)
     X_2 = standardize(X_2)
-    X_3 = standardize(X_3)
+    #X_3 = standardize(X_3)
     
-    return X_0, X_1, X_2, X_3, indices_0, indices_1, np.logical_or(indices_2, indices_3), indices_3
+    return X_0, X_1, X_2, indices_0, indices_1, np.logical_or(indices_2, indices_3)
 

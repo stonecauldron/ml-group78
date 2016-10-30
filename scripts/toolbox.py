@@ -243,31 +243,6 @@ def build_poly_cos_sin_poly(X, degree, phi):
                 result.append(np.sin(X[:,col])**d)
     return np.asarray(result).T
 
-def build_poly_cos_sin_log_poly(X, degree, phi):
-    result = []
-    for col in range(1,X.shape[1]):
-        for d in range(1, degree + 1):
-            result.append(X[:,col]**d)
-            if col in phi:    
-                result.append(np.cos(X[:,col])**d)
-                result.append(np.sin(X[:,col])**d)
-                log = feature_scaling(np.log(np.abs(X[:,col])), min_range=-1, max_range=1)   
-                result.append(log**d)
-    return np.asarray(result).T
-
-def build_poly_arccos_arcsin_poly(X, degree, phi):
-    result = []
-    for col in range(1,X.shape[1]):
-        for d in range(1, degree + 1):
-            result.append(X[:,col]**d)
-            if col in phi:    
-                arcsin = feature_scaling(np.arcsin(X[:,col]), min_range=-1, max_range=1)
-                result.append(arcsin**d)
-                arccos = feature_scaling(np.arccos(X[:,col]), min_range=-1, max_range=1)
-                result.append(arccos**d)
-    return np.asarray(result).T
-
-
 def build_poly_sin(X, degree, phi):
     result = []
     for col in range(1,X.shape[1]):
