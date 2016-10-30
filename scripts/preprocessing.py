@@ -10,9 +10,9 @@ def standardize(x, mean_x=None, std_x=None):
     if std_x is None:
         std_x = np.std(x, axis=0)
     x[:, std_x>0] = x[:, std_x>0] / std_x[std_x>0]
-    
     tx = np.hstack((np.ones((x.shape[0],1)), x))
     return tx
+
 
 def binarize_invalid_data(col, invalid_value=-999):
     """Transform features with -999 values into a binary categorisation"""
@@ -31,6 +31,30 @@ def binarize_positive_negative(col):
     result[positive_indices] = 1
     result[~positive_indices] = -1
     return result
+
+def clean_up_invalid_values_mean(col_x, invalid_value=-999):
+    col_x
+    mean = col_x[col_x != -999].mean()
+    col_x[col_x == -999] = mean
+    return col_x
+
+def clean_up_invalid_values_median(col_x, invalid_value=-999):
+    col_x
+    median = np.median(col_x[col_x != -999])
+    col_x[col_x == -999] = median
+    return col_x
+
+def mean_replace(X):
+    X0=np.zeros((X.shape[0],X.shape[1]))
+    for i in range(X.shape[1]):
+        X0[:,i]=clean_up_invalid_values_mean(X[:,i])
+    return X0
+
+def median_replace(X):
+    X0=np.zeros((X.shape[0],X.shape[1]))
+    for i in range(X.shape[1]):
+        X0[:,i]=clean_up_invalid_values_median(X[:,i])
+    return X0
 
 def feature_scaling(col, min_range=-1, max_range=1):
     """Scale the values of a feature to the range min_range to max_range"""
@@ -123,9 +147,9 @@ def separate_data(X, jet_col_nb=22):
     
     # find the indices of each discrete category
     invalid_cols_0 = [4, 5, 6, 9, 12, 22, 23, 24, 25, 26, 27, 28, 29]
-    invalid_cols_1 = [4, 5, 6, 12, 22, 26, 27, 28, 29]
-    invalid_cols_2 = [22, 29]
-    invalid_cols_3 = [22, 29]
+    invalid_cols_1 = [4, 5, 6, 9, 12, 22, 26, 27, 28]
+    invalid_cols_2 = [9,22]
+    invalid_cols_3 = [22]
     
     indices_0 = X[:,jet_col_nb] == 0
     indices_1 = X[:,jet_col_nb] == 1
@@ -134,7 +158,7 @@ def separate_data(X, jet_col_nb=22):
     
     X_0 = X[indices_0]
     X_1 = X[indices_1]
-    X_2 = X[indices_2]
+    X_2 = X[np.logical_or(indices_2, indices_3)]
     X_3 = X[indices_3]
      
     X_0 = np.delete(X_0, invalid_cols_0, axis=1)
@@ -142,9 +166,17 @@ def separate_data(X, jet_col_nb=22):
     X_2 = np.delete(X_2, invalid_cols_2, axis=1)
     X_3 = np.delete(X_3, invalid_cols_3, axis=1)
     
+    X_0 = median_replace(X_0)
+    X_1 = median_replace(X_1)
+    X_2 = median_replace(X_2)
+    
+    X_1= feature_scaling_matrix(X_1, min_range=-1, max_range=1)
+    X_2= feature_scaling_matrix(X_2, min_range=-1, max_range=1)
+    
     X_0 = standardize(X_0)
     X_1 = standardize(X_1)
     X_2 = standardize(X_2)
     X_3 = standardize(X_3)
     
-    return X_0, X_1, X_2, X_3, indices_0, indices_1, indices_2, indices_3
+    return X_0, X_1, X_2, X_3, indices_0, indices_1, np.logical_or(indices_2, indices_3), indices_3
+
